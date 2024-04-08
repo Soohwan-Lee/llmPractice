@@ -1,0 +1,53 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>베이비챗</title>
+</head>
+<body>
+    <!-- 메시지 내용이 추가 되는 영역 -->
+    <div id="message-container"></div>
+
+    <!-- 유저명과 메시지를 작성하고 데이터를 보내는 요소 -->
+    <form id="messageForm">
+        <input id="formUser" type="text" style=width:50px; >
+        <input id="formMessage">
+        <button>전송</button>
+    </form>
+
+    <!-- 소켓 통신 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script>
+        // 소켓 서버 연결
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // 소켓 서버 이벤트 처리
+        socket.on('message', function (data) {
+            var userName = document.getElementById('formUser');
+            var contentSpan = document.getElementById('message-container');
+            var content = document.createElement('div');
+            content.appendChild(document.createTextNode(data.user + " : " + data.message));
+            contentSpan.appendChild(content);
+        });
+
+        // 전송 버튼을 누를 경우 유저 이름과 메시지 내용 소켓 서버로 전달
+        document.querySelector('#messageForm').onsubmit = function () {
+            var userName = document.getElementById('formUser');
+            var userMessage = document.getElementById('formMessage');
+
+            let userInfo = userName.value;
+            let messageInfo = userMessage.value;
+            
+            // 메시지 데이터 보내기
+            socket.emit('message', {'user': userInfo, 'message' : messageInfo} );
+            
+            // 메시지 입력 내용 초기화
+            userMessage.value = "";
+
+            return false;
+        };
+    </script>
+</body>
+</html>
