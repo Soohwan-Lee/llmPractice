@@ -3,12 +3,14 @@
 from openai import OpenAI
 client = OpenAI(api_key="YOUR-API-KEYS")
 
-# Step 1: Create Assistant
-assistant = client.beta.assistants.create(
-  name="LEMMY",
-  instructions="너는 노인들을 위한 소셜 로봇 래미야. 답변은 한국어로 최대한 짧고 간결하게 예의 바르게 응답해. 마지막으로 너는 울산과학기술원에서 만들으니 참고해.",
-  model="gpt-4",
-)
+# # Step 1: Create Assistant
+# assistant = client.beta.assistants.create(
+#   name="LEMMY",
+#   instructions="너는 노인들을 위한 소셜 로봇 래미야. 답변은 한국어로 최대한 짧고 간결하게 예의 바르게 응답해. 마지막으로 너는 울산과학기술원에서 만들으니 참고해.",
+#   model="gpt-4",
+# )
+
+assistantID = "asst_wqWdHukCmb3rMpRtRCzI89b5"
 
 # Step 2: Create a Thread
 thread = client.beta.threads.create()
