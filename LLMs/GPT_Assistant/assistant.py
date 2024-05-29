@@ -6,17 +6,20 @@ import time
 # OPENAI_API_KEY 를 설정합니다.
 api_key = "YOUR-API-KEY"
 
+# OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
+client = OpenAI(api_key=api_key)
+
 # 인자로 받은 객체의 모델을 JSON 형태로 변환하여 출력
 def show_json(obj):
     print(json.loads(obj.model_dump_json()))    # Display
 
 ### 1. Assistant 생성 -> 되도록 Playground에서 생성 권장
 ### 1-1. Assistant ID를 불러옵니다(Playground에서 생성한 Assistant ID)
-ASSISTANT_ID = "asst_V8s4Ku4Eiid5QC9WABlwDsYs"
-print("Assistant ID: " + ASSISTANT_ID)  # Assistant ID 출력
+# ASSISTANT_ID = "asst_V8s4Ku4Eiid5QC9WABlwDsYs"
+# print("Assistant ID: " + ASSISTANT_ID)  # Assistant ID 출력
 
-# OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
-client = OpenAI(api_key=api_key)
+# # OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
+# client = OpenAI(api_key=api_key)
 
 # ### 1-2. Assistant 를 생성합니다.
 # from openai import OpenAI
@@ -48,9 +51,6 @@ def create_new_thread():
     # 새로운 스레드를 생성합니다.
     thread = client.beta.threads.create()
     return thread
-
-
-
 
 
 
@@ -111,9 +111,21 @@ def ask(assistant_id, thread_id, user_message):
 
 ### main function
 def main():
-    thread_id = "기존 스레드 ID"
-    # thread_id = create_new_thread().id  # 새로운 스레드를 생성합니다.
+    # Assistnat ID
+    ASSISTANT_ID = "asst_V8s4Ku4Eiid5QC9WABlwDsYs"
+
+    # 새로운 스레드 생성
+    thread = create_new_thread()
+    # 새로운 스레드를 생성합니다.
+    show_json(thread)
+    # 새롭게 생성한 스레드 ID를 저장합니다.
+    THREAD_ID = thread.id
+
+    # # 만약 생성해둔 스레드가 있다면?
+    # thread_id = "기존 스레드 ID"
+
     run = ask(ASSISTANT_ID, thread_id, "I need to solve `1 + 20`. Can you help me?")
+    print(run)
 
 def all_dialogue(thread_id):
     # 전체 대화내용 출력
