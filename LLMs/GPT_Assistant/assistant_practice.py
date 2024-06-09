@@ -1,7 +1,7 @@
 # https://platform.openai.com/docs/assistants/overview?context=without-streaming
-
+# YOUR_API_KEY
 from openai import OpenAI
-client = OpenAI(api_key="YOUR-API-KEYS")
+client = OpenAI(api_key="YOUR_API_KEY")
 
 # # Step 1: Create Assistant
 # assistant = client.beta.assistants.create(
@@ -28,7 +28,8 @@ message = client.beta.threads.messages.create(
 # )
 run = client.beta.threads.runs.create_and_poll(
   thread_id=thread.id,
-  assistant_id=assistant.id,
+  # assistant_id=assistant.id,  # Assistant를 직접 생성했을 경우
+  assistant_id=assistantID,
   instructions="현재 노인 사용자와 대화를 하고 있으니 최대한 짧고 간결하고 친절하게 응답해."
 )
 

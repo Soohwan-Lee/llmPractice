@@ -3,60 +3,43 @@ import json
 from openai import OpenAI
 import time
 
-# OPENAI_API_KEY 를 설정합니다.
-api_key = "YOUR-API-KEY"
+# Set your OpenAI API key 'YOUR_API_KEY'
+api_key = "YOUR_API_KEY"
 
-# OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
+# Create a client object to use the OpenAI API.
 client = OpenAI(api_key=api_key)
 
-# 인자로 받은 객체의 모델을 JSON 형태로 변환하여 출력
+# Function to display JSON
 def show_json(obj):
-    print(json.loads(obj.model_dump_json()))    # Display
+    print(json.dumps(obj, indent=2))
 
-### 1. Assistant 생성 -> 되도록 Playground에서 생성 권장
-### 1-1. Assistant ID를 불러옵니다(Playground에서 생성한 Assistant ID)
-# ASSISTANT_ID = "asst_V8s4Ku4Eiid5QC9WABlwDsYs"
-# print("Assistant ID: " + ASSISTANT_ID)  # Assistant ID 출력
+# # Function to create a new assistant
+# def create_assistant():
+#     """
+#     Creates a new assistant with specific instructions.
+#     """
+#     response = client.beta.assistants.create(
+#         name="Devil's Advocate",
+#         instructions="""You are the "devil's advocate" who uses Socratic questioning to help group discussion participants rethink the correctness of their group decisions. Your role is to provide a logical, well-reasoned counterargument to the majority opinion. Engage in critical thinking and challenge assumptions. You are not a participant but a facilitator who helps members critically reflect on their thinking.""",
+#         model="gpt-4-turbo-preview"
+#     )
+#     assistant_id = response.id
+#     print(f"Assistant created with ID: {assistant_id}")
+#     return assistant_id
 
-# # OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
-# client = OpenAI(api_key=api_key)
-
-# ### 1-2. Assistant 를 생성합니다.
-# from openai import OpenAI
-
-# # OpenAI API를 사용하기 위한 클라이언트 객체를 생성합니다.
-# client = OpenAI(api_key=api_key)
-
-# # Assistant 를 생성합니다.
-# assistant = client.beta.assistants.create(
-#     name="Math Tutor",  # 챗봇의 이름을 지정합니다.
-#     # 챗봇의 역할을 설명합니다.
-#     instructions="You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-#     model="gpt-4-turbo-preview",  # 사용할 모델을 지정합니다.
-# )
-
-# # 생성된 챗봇의 정보를 JSON 형태로 출력합니다.
-# show_json(assistant)
-# ASSISTANT_ID = assistant.id
-# print("Assistant ID: " + ASSISTANT_ID)    # Assistant ID 출력
-
-
-
-### 2. Thread 생성하기
-# ### 2-1. 스레드를 이미 생성한 경우
-# THREAD_ID = "thread_6We5fHvb5NBuacPfZYkqUWlO"
-
-### 2-2. 스레드를 새롭게 생성합니다.
+# Function to create a new thread
 def create_new_thread():
-    # 새로운 스레드를 생성합니다.
+    """
+    Creates a new conversation thread.
+    """
     thread = client.beta.threads.create()
     return thread
 
-
-
-### 3. Thread에 메시지 생성
-# 반복문에서 대기하는 함수
+# Function to wait for the run to complete
 def wait_on_run(run, thread_id):
+    """
+    Waits for the run to complete by polling its status.
+    """
     while run.status == "queued" or run.status == "in_progress":
         # 3-3. 실행 상태를 최신 정보로 업데이트합니다.
         run = client.beta.threads.runs.retrieve(
@@ -66,8 +49,11 @@ def wait_on_run(run, thread_id):
         time.sleep(0.5)
     return run
 
-
+# Function to submit a message in the thread
 def submit_message(assistant_id, thread_id, user_message):
+    """
+    Sends a message in the specified thread and starts a run.
+    """
     # 3-1. 스레드에 종속된 메시지를 '추가' 합니다.
     client.beta.threads.messages.create(
         thread_id=thread_id, role="user", content=user_message
@@ -79,18 +65,26 @@ def submit_message(assistant_id, thread_id, user_message):
     )
     return run
 
-
+# Function to get the response messages from the thread
 def get_response(thread_id):
-    # 3-4. 스레드에 종속된 메시지를 '조회' 합니다.
+    """
+    Retrieves the messages from the specified thread.
+    """
     return client.beta.threads.messages.list(thread_id=thread_id, order="asc")
 
-
+# Function to print messages from the response
 def print_message(response):
-    for res in response:
+    """
+    Prints the messages from the response.
+    """
+    for res in response.data:
         print(f"[{res.role.upper()}]\n{res.content[0].text.value}\n")
 
-
+# Function to handle a user's message and get a response
 def ask(assistant_id, thread_id, user_message):
+    """
+    Submits a user's message and retrieves the assistant's response.
+    """
     run = submit_message(
         assistant_id,
         thread_id,
@@ -98,35 +92,31 @@ def ask(assistant_id, thread_id, user_message):
     )
     # 실행이 완료될 때까지 대기합니다.
     run = wait_on_run(run, thread_id)
-    print_message(get_response(thread_id).data[-2:])
+    print_message(get_response(thread_id))
     return run
 
-# # 새로운 스레드를 생성하고 메시지를 제출하는 함수를 정의합니다.
-# def create_thread_and_run(user_input):
-#     # 사용자 입력을 받아 새로운 스레드를 생성하고, Assistant 에게 메시지를 제출합니다.
-#     thread = client.beta.threads.create()
-#     run = submit_message(ASSISTANT_ID, thread, user_input)
-#     return thread, run
-
-
-### main function
+# Main function to facilitate a multi-turn conversation with the assistant
 def main():
-    # Assistnat ID
-    ASSISTANT_ID = "asst_V8s4Ku4Eiid5QC9WABlwDsYs"
+    """
+    Main function to facilitate a multi-turn conversation with the assistant.
+    """
+    # Create a new assistant
+    # ASSISTANT_ID = create_assistant()
+    ASSISTANT_ID = "asst_4Eg0Fv97rAVVnwmnpuXFpCOC"
 
-    # 새로운 스레드 생성
+    # Create a new thread
     thread = create_new_thread()
-    # 새로운 스레드를 생성합니다.
-    show_json(thread)
-    # 새롭게 생성한 스레드 ID를 저장합니다.
+    show_json(thread.model_dump())  # Use model_dump to get serializable data
     THREAD_ID = thread.id
 
-    # # 만약 생성해둔 스레드가 있다면?
-    # thread_id = "기존 스레드 ID"
+    user_input = ""
+    while user_input.lower() != "exit":
+        user_input = input("You: ")
+        if user_input.lower() == "exit":
+            break
+        
+        run = ask(ASSISTANT_ID, THREAD_ID, user_input)
+        # show_json(run.model_dump())  # Use model_dump to get serializable data
 
-    run = ask(ASSISTANT_ID, thread_id, "I need to solve `1 + 20`. Can you help me?")
-    print(run)
-
-def all_dialogue(thread_id):
-    # 전체 대화내용 출력
-    print_message(get_response(thread_id).data[:])
+if __name__ == "__main__":
+    main()
